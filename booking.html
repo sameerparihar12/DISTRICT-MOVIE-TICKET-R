@@ -92,28 +92,11 @@
     <p>&copy; 2025 Jaagat Talkis • All rights reserved</p>
   </footer>
 
-  <script>
-    const query = new URLSearchParams(window.location.search);
-    const movie = query.get("movie") || "Selected Movie";
-    document.getElementById("movieTitle").innerText = movie;
-
-    const seatSelect = document.getElementById("seats");
-    const priceDisplay = document.getElementById("totalPrice");
-    const pricePerTicket = 100;
-
-    seatSelect.addEventListener("change", () => {
-      const seats = parseInt(seatSelect.value);
-      priceDisplay.innerText = pricePerTicket * seats;
-    });
-
-    document.getElementById("bookingForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      alert("✅ Booking created!\n\n(cashfree gateway will be integrated here)");
-    });
-  </script>
+<!-- Cashfree SDK -->
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
 <script>
-  const cashfree = Cashfree({ mode: "production" }); // Change to "production" when live
+  const cashfree = Cashfree({ mode: "sandbox" }); // production later
 
   document.getElementById("bookingForm").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -123,38 +106,40 @@
     const showtime = document.getElementById("showtime").value;
     const seats = parseInt(document.getElementById("seats").value);
     const email = document.getElementById("email").value;
-    const amount = 100 * seats; // Ticket price in INR
+    const amount = 100 * seats;
 
     try {
-      // 1️⃣ Call your backend to create an order in Cashfree
-      const res = await fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderAmount: amount,
-          customerEmail: email,
-          customerName: "Jaagat Talkis Customer",
-          customerPhone: "9999999999", // required by Cashfree
-          orderNote: `${movie} - ${showtime} (${date})`
-        })
-      });
+      const res = await fetch(
+        "https://district-movie-ticket.onrender.com/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderAmount: amount,
+            customerEmail: email,
+            customerName: "Jaagat Talkis Customer",
+            customerPhone: "9999999999",
+            orderNote: `${movie} - ${showtime} (${date})`
+          })
+        }
+      );
 
       const data = await res.json();
 
       if (!data.payment_session_id) {
-        alert("❌ Failed to create payment order.");
+        alert("❌ Failed to create payment order");
+        console.log(data);
         return;
       }
 
-      // 2️⃣ Open Cashfree payment page
       cashfree.pay({
         paymentSessionId: data.payment_session_id,
-        redirectTarget: "_self" // or "_blank" for new tab
+        redirectTarget: "_self"
       });
 
     } catch (err) {
       console.error(err);
-      alert("Payment failed to start.");
+      alert("Payment failed to start");
     }
   });
 </script>
