@@ -96,33 +96,21 @@
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <script>
-  const cashfree = Cashfree({ mode: "sandbox" }); // production later
+  const res = await fetch(
+  "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      orderAmount: amount,
+      customerEmail: email,
+      customerName: "Jaagat Talkis Customer",
+      customerPhone: "9999999999",
+      orderNote: `${movie} - ${showtime} (${date})`
+    })
+  }
+);
 
-  document.getElementById("bookingForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const movie = document.getElementById("movieTitle").innerText;
-    const date = document.getElementById("date").value;
-    const showtime = document.getElementById("showtime").value;
-    const seats = parseInt(document.getElementById("seats").value);
-    const email = document.getElementById("email").value;
-    const amount = 100 * seats;
-
-    try {
-      const res = await fetch(
-        "https://district-movie-ticket.onrender.com/create-order",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderAmount: amount,
-            customerEmail: email,
-            customerName: "Jaagat Talkis Customer",
-            customerPhone: "9999999999",
-            orderNote: `${movie} - ${showtime} (${date})`
-          })
-        }
-      );
 
       const data = await res.json();
 
