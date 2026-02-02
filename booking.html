@@ -54,39 +54,37 @@
       <a href="contact.html">Support</a>
     </nav>
   </header>
+<div class="booking-container">
+  <h2 id="movieTitle">Movie</h2>
 
-  <div class="booking-container">
-    <h2 id="movieTitle">Movie</h2>
-    
-    <form id="bookingForm">
-      <label for="date">Select Date:</label>
-      <input type="date" id="date" required />
+  <label>Select Date:</label>
+  <input type="date" id="date" required />
 
-      <label for="showtime">Select Show Time:</label>
-      <select id="showtime" required>
-        <option value="9 AM">9 AM</option>
-        <option value="12 PM">12 PM</option>
-        <option value="3 PM">3 PM</option>
-        <option value="6 PM">6 PM</option>
-        <option value="9 PM">9 PM</option>
-      </select>
+  <label>Select Show Time:</label>
+  <select id="showtime">
+    <option value="9 AM">9 AM</option>
+    <option value="12 PM">12 PM</option>
+    <option value="3 PM">3 PM</option>
+    <option value="6 PM">6 PM</option>
+    <option value="9 PM">9 PM</option>
+  </select>
 
-      <label for="seats">Number of Seats:</label>
-      <select id="seats" required>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
+  <label>Number of Seats:</label>
+  <select id="seats">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
 
-      <label for="email">Your Email:</label>
-      <input type="email" id="email" placeholder="you@example.com" required />
+  <label>Your Email:</label>
+  <input type="email" id="email" />
 
-      <div class="price">Total: ₹<span id="totalPrice">100</span></div>
+  <div class="price">Total: ₹<span id="totalPrice">100</span></div>
 
-      <button type="submit">Pay now </button>
-    </form>
-  </div>
+  <button type="button" id="payBtn">Pay now</button>
+</div>
+
 
   <footer>
     <p>&copy; 2025 Jaagat Talkis • All rights reserved</p>
