@@ -84,7 +84,7 @@
 
       <div class="price">Total: ₹<span id="totalPrice">100</span></div>
 
-      <button type="submit">Pay with Razorpay</button>
+      <button type="submit">Pay now </button>
     </form>
   </div>
 
@@ -96,27 +96,44 @@
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <script>
-  const res = await fetch(
-  "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      orderAmount: amount,
-      customerEmail: email,
-      customerName: "Jaagat Talkis Customer",
-      customerPhone: "9999999999",
-      orderNote: `${movie} - ${showtime} (${date})`
-    })
-  }
-);
+  const cashfree = Cashfree({ mode: "sandbox" });
 
+  document.getElementById("payBtn").addEventListener("click", async function () {
+
+    const movie = document.getElementById("movieTitle").innerText;
+    const date = document.getElementById("date").value;
+    const showtime = document.getElementById("showtime").value;
+    const seats = parseInt(document.getElementById("seats").value);
+    const email = document.getElementById("email").value;
+    const amount = 100 * seats;
+
+    if (!date || !email || !seats) {
+      alert("Please fill all details");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderAmount: amount,
+            customerEmail: email,
+            customerName: "Jaagat Talkis Customer",
+            customerPhone: "9999999999",
+            orderNote: `${movie} - ${showtime} (${date})`
+          })
+        }
+      );
 
       const data = await res.json();
+      console.log("Backend response:", data); // IMPORTANT
 
+      // 🚨 STOP if payment_session_id is missing
       if (!data.payment_session_id) {
-        alert("❌ Failed to create payment order");
-        console.log(data);
+        alert("❌ Payment session not created");
         return;
       }
 
