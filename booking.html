@@ -113,7 +113,7 @@
   </script>
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 <script>
-  const cashfree = Cashfree({ mode: "sandbox" }); // Change to "production" when live
+  const cashfree = Cashfree({ mode: "production" }); // Change to "production" when live
 
   document.getElementById("bookingForm").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -127,7 +127,7 @@
 
     try {
       // 1️⃣ Call your backend to create an order in Cashfree
-      const res = await fetch("/create-order", {
+      const res = await fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
