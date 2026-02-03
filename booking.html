@@ -92,11 +92,9 @@
 
 <!-- Cashfree SDK -->
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
 <script>
-  const cashfree = Cashfree({ mode: "production" }); // 🔴 LIVE
-</script>
-
-
+  const cashfree = Cashfree({ mode: "production" }); // LIVE
 
   document.getElementById("payBtn").addEventListener("click", async function () {
 
@@ -121,7 +119,7 @@
           body: JSON.stringify({
             orderAmount: amount,
             customerEmail: email,
-            customerName: "Jaagat Talkis Customer",
+            customerName: "District Movie Ticket Customer",
             customerPhone: "9999999999",
             orderNote: `${movie} - ${showtime} (${date})`
           })
@@ -129,9 +127,8 @@
       );
 
       const data = await res.json();
-      console.log("Backend response:", data); // IMPORTANT
+      console.log("Backend response:", data);
 
-      // 🚨 STOP if payment_session_id is missing
       if (!data.payment_session_id) {
         alert("❌ Payment session not created");
         return;
