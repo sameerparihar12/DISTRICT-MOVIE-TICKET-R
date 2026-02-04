@@ -94,9 +94,13 @@
 <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <script>
-  const cashfree = Cashfree({ mode: "production" }); // LIVE
+document.addEventListener("DOMContentLoaded", function () {
 
-  document.getElementById("payBtn").addEventListener("click", async function () {
+  const cashfree = Cashfree({ mode: "production" });
+
+  const payBtn = document.getElementById("payBtn");
+
+  payBtn.addEventListener("click", function () {
 
     const movie = document.getElementById("movieTitle").innerText;
     const date = document.getElementById("date").value;
@@ -110,45 +114,39 @@
       return;
     }
 
-    try {
-      fetch(
-  "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      orderAmount: amount,
-      customerEmail: email,
-      customerName: "District Movie Ticket Customer",
-      customerPhone: "9999999999",
-      orderNote: `${movie} - ${showtime} (${date})`
+    fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderAmount: amount,
+        customerEmail: email,
+        customerName: "District Movie Ticket Customer",
+        customerPhone: "9999999999",
+        orderNote: `${movie} - ${showtime} (${date})`
+      })
     })
-  }
-)
-.then(res => res.json())
-.then(data => {
-  console.log("Backend response:", data);
+    .then(res => res.json())
+    .then(data => {
+      console.log("Backend response:", data);
 
-  if (!data.payment_session_id) {
-    alert("Payment session not created");
-    return;
-  }
+      if (!data.payment_session_id) {
+        alert("Payment session not created");
+        return;
+      }
 
-  // ✅ This now runs inside click chain (Android allows it)
-  cashfree.pay({
-    paymentSessionId: data.payment_session_id,
-    redirectTarget: "_self"
-  });
-})
-.catch(err => {
-  console.error(err);
-  alert("Payment failed to start");
-});
-
-
-    } catch (err) {
+      // ✅ ANDROID-SAFE
+      cashfree.pay({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_blank"
+      });
+    })
+    .catch(err => {
       console.error(err);
       alert("Payment failed to start");
-    }
+    });
+
   });
+
+});
 </script>
+
