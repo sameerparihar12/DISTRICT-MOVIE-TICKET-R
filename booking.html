@@ -1,39 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>District Movie Ticket</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      background: linear-gradient(135deg, #141e30, #243b55);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
       color: #fff;
     }
 
     .card {
-      background: #1e1e1e;
+      background: #1f1f1f;
       padding: 25px;
-      border-radius: 12px;
       width: 100%;
       max-width: 420px;
+      border-radius: 12px;
       box-shadow: 0 15px 40px rgba(0,0,0,0.5);
     }
 
     h1 {
       text-align: center;
       margin-bottom: 20px;
-      color: #00ffcc;
+      color: #00ffc8;
     }
 
     label {
@@ -48,16 +44,15 @@
       margin-top: 6px;
       border-radius: 6px;
       border: none;
-      outline: none;
-      background: #2d2d2d;
+      background: #2e2e2e;
       color: #fff;
     }
 
     .price {
       margin-top: 15px;
-      font-size: 16px;
-      color: #00ff99;
       text-align: center;
+      color: #00ff99;
+      font-size: 16px;
     }
 
     button {
@@ -71,101 +66,86 @@
       font-size: 16px;
       cursor: pointer;
     }
-
-    button:active {
-      transform: scale(0.98);
-    }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h1>🎟️ Movie Ticket</h1>
+<div class="card">
+  <h1>🎟️ Movie Ticket</h1>
 
-    <label>Date</label>
-    <input type="date" id="date">
+  <label>Date</label>
+  <input type="date" id="date">
 
-    <label>Show Time</label>
-    <select id="showtime">
-      <option value="9 AM">9 AM</option>
-      <option value="12 PM">12 PM</option>
-      <option value="3 PM">3 PM</option>
-      <option value="6 PM">6 PM</option>
-      <option value="9 PM">9 PM</option>
-    </select>
+  <label>Show Time</label>
+  <select id="showtime">
+    <option>9 AM</option>
+    <option>12 PM</option>
+    <option>3 PM</option>
+    <option>6 PM</option>
+    <option>9 PM</option>
+  </select>
 
-    <label>Seats</label>
-    <select id="seats">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-    </select>
+  <label>Seats</label>
+  <select id="seats">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
 
-    <label>Email</label>
-    <input type="email" id="email" placeholder="you@example.com">
+  <label>Email</label>
+  <input type="email" id="email" placeholder="you@example.com">
 
-    <div class="price">
-      Total Amount: ₹<span id="amount">100</span>
-    </div>
-
-    <button id="payBtn">Pay Now</button>
+  <div class="price">
+    Total: ₹<span id="amount">100</span>
   </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+  <button id="payBtn">Pay Now</button>
+</div>
 
-  const seatsEl = document.getElementById("seats");
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const seats = document.getElementById("seats");
   const amountEl = document.getElementById("amount");
   const payBtn = document.getElementById("payBtn");
 
-  seatsEl.addEventListener("change", () => {
-    amountEl.innerText = seatsEl.value * 100;
+  seats.addEventListener("change", () => {
+    amountEl.innerText = seats.value * 100;
   });
 
-  payBtn.addEventListener("click", function () {
+  payBtn.addEventListener("click", () => {
 
     const date = document.getElementById("date").value;
-    const showtime = document.getElementById("showtime").value;
-    const seats = parseInt(seatsEl.value);
     const email = document.getElementById("email").value;
-    const amount = seats * 100;
+    const seatCount = parseInt(seats.value);
+    const amount = seatCount * 100;
 
     if (!date || !email) {
       alert("Please fill all details");
       return;
     }
 
-    fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-order", {
+    fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-payment-link", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        orderAmount: amount,
-        customerEmail: email,
-        customerName: "District Movie Ticket Customer",
-        customerPhone: "9999999999",
-        orderNote: `Show ${showtime} on ${date}`
+        amount: amount,
+        email: email,
+        phone: "9999999999"
       })
     })
     .then(res => res.json())
     .then(data => {
-
-      if (!data.payment_session_id || !data.order_id) {
-        alert("Payment session not created");
+      if (!data.link_url) {
+        alert("Payment link failed");
         return;
       }
-
-      // ✅ OFFICIAL CASHFREE HOSTED CHECKOUT
-      const paymentUrl =
-  "https://payments.cashfree.com/checkout/#/payment?payment_session_id=" +
-  data.payment_session_id;
-
-      window.location.href = paymentUrl;
+      window.location.href = data.link_url;
     })
     .catch(() => {
       alert("Payment failed to start");
     });
-
   });
 
 });
