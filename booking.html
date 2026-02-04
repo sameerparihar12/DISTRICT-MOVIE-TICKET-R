@@ -134,12 +134,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // 🔥 CASHFREE JOD-TOD (NO SDK, GUARANTEED)
       const paymentUrl =
-  "https://payments.cashfree.com/order/#/" +
+  "https://payments.cashfree.com/pg/orders/" +
+  data.order_id +
+  "?payment_session_id=" +
   data.payment_session_id;
-;
 
-      window.location.href = paymentUrl;
-    })
+window.location.href = paymentUrl;
+
     .catch(err => {
       console.error(err);
       alert("Payment failed to start");
