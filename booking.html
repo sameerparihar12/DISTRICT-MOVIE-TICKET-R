@@ -134,8 +134,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // 🔥 CASHFREE JOD-TOD (NO SDK, GUARANTEED)
       const paymentUrl =
-        "https://payments.cashfree.com/checkout/?session_id=" +
-        data.payment_session_id;
+  "https://payments.cashfree.com/order/#/" +
+  data.payment_session_id;
+;
 
       window.location.href = paymentUrl;
     })
