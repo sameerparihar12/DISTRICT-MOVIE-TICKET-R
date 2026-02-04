@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book Tickets - DISTRICT MOVIE TICKET R </title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Book Tickets - DISTRICT MOVIE TICKET R</title>
+
   <style>
+    body { background:#111; color:#fff; font-family: Arial, sans-serif; }
     .booking-container {
       max-width: 500px;
       margin: 2rem auto;
@@ -47,18 +48,15 @@
 </head>
 <body>
 
-  <header>
-    <h1>🎟️ Book Your Ticket</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="contact.html">Support</a>
-    </nav>
-  </header>
+<header style="text-align:center">
+  <h1>🎟️ Book Your Ticket</h1>
+</header>
+
 <div class="booking-container">
   <h2 id="movieTitle">Movie</h2>
 
   <label>Select Date:</label>
-  <input type="date" id="date" required />
+  <input type="date" id="date" />
 
   <label>Select Show Time:</label>
   <select id="showtime">
@@ -82,23 +80,23 @@
 
   <div class="price">Total: ₹<span id="totalPrice">100</span></div>
 
-  <button type="button" id="payBtn">Pay now</button>
+  <button id="payBtn">Pay now</button>
 </div>
 
-
-  <footer>
-    <p>&copy; 2025 DISTRICT MOVIE TICKET • All rights reserved</p>
-  </footer>
-
-<!-- Cashfree SDK -->
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<footer style="text-align:center; margin-top:20px;">
+  <p>&copy; 2025 DISTRICT MOVIE TICKET</p>
+</footer>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  const cashfree = Cashfree({ mode: "production" });
-
   const payBtn = document.getElementById("payBtn");
+  const seatsEl = document.getElementById("seats");
+  const priceEl = document.getElementById("totalPrice");
+
+  seatsEl.addEventListener("change", () => {
+    priceEl.innerText = 100 * parseInt(seatsEl.value);
+  });
 
   payBtn.addEventListener("click", function () {
 
@@ -134,19 +132,21 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // ✅ ANDROID-SAFE
-      cashfree.pay({
-        paymentSessionId: data.payment_session_id,
-        redirectTarget: "_blank"
-      });
+      // 🔥 CASHFREE JOD-TOD (NO SDK, GUARANTEED)
+      const paymentUrl =
+        "https://payments.cashfree.com/checkout/?session_id=" +
+        data.payment_session_id;
+
+      window.location.href = paymentUrl;
     })
     .catch(err => {
       console.error(err);
       alert("Payment failed to start");
     });
-
   });
 
 });
 </script>
 
+</body>
+</html>
