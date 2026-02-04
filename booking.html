@@ -157,10 +157,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // ✅ OFFICIAL CASHFREE HOSTED CHECKOUT
       const paymentUrl =
-        "https://payments.cashfree.com/pg/orders/" +
-        data.order_id +
-        "?payment_session_id=" +
-        data.payment_session_id;
+  "https://payments.cashfree.com/checkout/#/payment?payment_session_id=" +
+  data.payment_session_id;
 
       window.location.href = paymentUrl;
     })
