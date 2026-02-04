@@ -127,29 +127,26 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(data => {
       console.log("Backend response:", data);
 
-      if (!data.payment_session_id) {
+      if (!data.payment_session_id || !data.order_id) {
         alert("Payment session not created");
         return;
       }
 
-      // 🔥 CASHFREE JOD-TOD (NO SDK, GUARANTEED)
+      // ✅ FINAL & CORRECT REDIRECT
       const paymentUrl =
-  "https://payments.cashfree.com/pg/orders/" +
-  data.order_id +
-  "?payment_session_id=" +
-  data.payment_session_id;
+        "https://payments.cashfree.com/pg/orders/" +
+        data.order_id +
+        "?payment_session_id=" +
+        data.payment_session_id;
 
-window.location.href = paymentUrl;
-
-
+      window.location.href = paymentUrl;
+    })
     .catch(err => {
       console.error(err);
       alert("Payment failed to start");
     });
+
   });
 
 });
 </script>
-
-</body>
-</html>
