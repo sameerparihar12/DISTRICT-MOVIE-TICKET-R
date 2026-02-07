@@ -1,49 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Movie Ticket</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Ticket Booking</title>
 
-  <style>
-    body {
-      background:#0f172a;
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      font-family:Arial;
-      color:#fff;
-    }
-    .box {
-      background:#111827;
-      padding:25px;
-      width:100%;
-      max-width:400px;
-      border-radius:12px;
-    }
-    input,select,button {
-      width:100%;
-      margin-top:10px;
-      padding:10px;
-      border-radius:6px;
-      border:none;
-    }
-    button {
-      background:#22c55e;
-      color:#000;
-      font-weight:bold;
-      cursor:pointer;
-    }
-  </style>
+<style>
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial,sans-serif;
+  color:#fff;
+}
+.card{
+  background:#111;
+  padding:25px;
+  width:100%;
+  max-width:420px;
+  border-radius:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
+}
+h2{text-align:center;margin-bottom:20px}
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+  border:none;
+}
+input,select{background:#222;color:#fff}
+button{
+  background:#00e676;
+  color:#000;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.price{
+  margin-top:15px;
+  text-align:center;
+  color:#00ff99;
+}
+</style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="card">
   <h2>🎟 Movie Ticket</h2>
 
-  <input type="email" id="email" placeholder="Email">
+  <input type="email" id="email" placeholder="Enter email">
+
   <select id="seats">
     <option value="1">1 Seat</option>
     <option value="2">2 Seats</option>
@@ -51,7 +62,7 @@
     <option value="4">4 Seats</option>
   </select>
 
-  <p>Total: ₹<span id="amt">100</span></p>
+  <div class="price">Total: ₹<span id="amount">100</span></div>
 
   <button id="payBtn">Pay Now</button>
 </div>
@@ -64,12 +75,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const cashfree = Cashfree({ mode: "production" });
 
   const seats = document.getElementById("seats");
-  const amt = document.getElementById("amt");
-  const btn = document.getElementById("payBtn");
+  const amountEl = document.getElementById("amount");
+  const payBtn = document.getElementById("payBtn");
 
-  seats.onchange = () => amt.innerText = seats.value * 100;
+  seats.addEventListener("change", () => {
+    amountEl.innerText = seats.value * 100;
+  });
 
-  btn.onclick = () => {
+  payBtn.addEventListener("click", () => {
+    alert("PAY BUTTON CLICKED"); // 🔴 DEBUG (must show)
+
     const email = document.getElementById("email").value;
     const amount = seats.value * 100;
 
@@ -78,31 +93,34 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    fetch("https://YOUR-RENDER-BACKEND.onrender.com/create-order", {
+    fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount,
-        email,
+        amount: amount,
+        email: email,
         phone: "9999999999"
       })
     })
     .then(res => res.json())
     .then(data => {
+      console.log("BACKEND RESPONSE:", data);
 
       if (!data.payment_session_id) {
-        alert("Session failed");
+        alert("Session not created");
         return;
       }
 
       cashfree.pay({
         paymentSessionId: data.payment_session_id,
-        redirectTarget: "_top"   // 🔥 Netlify + Android SAFE
+        redirectTarget: "_top"
       });
-
     })
-    .catch(() => alert("Payment failed"));
-  };
+    .catch(err => {
+      console.error(err);
+      alert("Payment failed");
+    });
+  });
 
 });
 </script>
