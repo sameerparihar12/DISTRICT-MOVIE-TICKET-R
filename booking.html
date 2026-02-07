@@ -1,134 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movie Ticket Booking</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Ticket</title>
 
-<style>
-body{
-  margin:0;
-  min-height:100vh;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:Arial,sans-serif;
-  color:#fff;
-}
-.card{
-  background:#111;
-  padding:25px;
-  width:100%;
-  max-width:420px;
-  border-radius:12px;
-  box-shadow:0 20px 50px rgba(0,0,0,.6);
-}
-h2{text-align:center;margin-bottom:20px}
-input,select,button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:6px;
-  border:none;
-}
-input,select{background:#222;color:#fff}
-button{
-  background:#00e676;
-  color:#000;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-}
-.price{
-  margin-top:15px;
-  text-align:center;
-  color:#00ff99;
-}
-</style>
+  <style>
+    body {
+      background:#111;
+      color:#fff;
+      font-family: Arial, sans-serif;
+    }
+    .box {
+      max-width: 420px;
+      margin: 40px auto;
+      background:#1e1e1e;
+      padding:20px;
+      border-radius:8px;
+    }
+    label {
+      display:block;
+      margin-top:12px;
+    }
+    input, select, button {
+      width:100%;
+      margin-top:6px;
+      padding:10px;
+      border-radius:5px;
+      border:none;
+      font-size:15px;
+    }
+    input, select {
+      background:#333;
+      color:#fff;
+    }
+    button {
+      background:#e50914;
+      color:#fff;
+      margin-top:20px;
+      cursor:pointer;
+    }
+    .price {
+      margin-top:15px;
+      color:#00ff99;
+      font-weight:bold;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h2>🎟 Movie Ticket</h2>
+<div class="box">
+  <h2>🎟️ Movie Ticket Booking</h2>
 
-  <input type="email" id="email" placeholder="Enter email">
+  <label>Date</label>
+  <input type="date" id="date" required>
 
-  <select id="seats">
-    <option value="1">1 Seat</option>
-    <option value="2">2 Seats</option>
-    <option value="3">3 Seats</option>
-    <option value="4">4 Seats</option>
+  <label>Show Time</label>
+  <select id="showtime">
+    <option value="9 AM">9 AM</option>
+    <option value="12 PM">12 PM</option>
+    <option value="3 PM">3 PM</option>
+    <option value="6 PM">6 PM</option>
+    <option value="9 PM">9 PM</option>
   </select>
 
-  <div class="price">
-    Total: ₹<span id="amount">100</span>
-  </div>
+  <label>Seats</label>
+  <select id="seats">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
+
+  <label>Email</label>
+  <input type="email" id="email" placeholder="you@email.com" required>
+
+  <div class="price">Total: ₹<span id="total">100</span></div>
 
   <button id="payBtn">Pay Now</button>
 </div>
 
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+const seatsEl = document.getElementById("seats");
+const totalEl = document.getElementById("total");
 
-  const cashfree = Cashfree({ mode: "production" });
+seatsEl.addEventListener("change", () => {
+  totalEl.innerText = seatsEl.value * 100;
+});
 
-  const seats = document.getElementById("seats");
-  const amountEl = document.getElementById("amount");
-  const payBtn = document.getElementById("payBtn");
+document.getElementById("payBtn").addEventListener("click", async () => {
 
-  seats.addEventListener("change", () => {
-    amountEl.innerText = seats.value * 100;
-  });
+  const date = document.getElementById("date").value;
+  const showtime = document.getElementById("showtime").value;
+  const seats = parseInt(seatsEl.value);
+  const email = document.getElementById("email").value;
 
-  payBtn.addEventListener("click", async () => {
+  if (!date || !email || !seats) {
+    alert("Fill all details");
+    return;
+  }
 
-    const email = document.getElementById("email").value;
-    const amount = seats.value * 100;
+  try {
+    const res = await fetch(
+      "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderAmount: seats * 100,
+          customerEmail: email,
+          customerName: "Movie Ticket Customer",
+          customerPhone: "9999999999",
+          orderNote: `Movie - ${showtime} (${date})`
+        })
+      }
+    );
 
-    if (!email) {
-      alert("Enter email");
+    const data = await res.json();
+    console.log(data);
+
+    if (!data.payment_session_id) {
+      alert("Payment session not created");
       return;
     }
 
-    try {
-      const res = await fetch(
-        "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: amount,
-            email: email,
-            phone: "9999999999"
-          })
-        }
-      );
+    // ✅ OFFICIAL CASHFREE REDIRECT (NO SDK)
+    window.location.href =
+      "https://payments.cashfree.com/checkout/" +
+      data.payment_session_id;
 
-      const data = await res.json();
-      console.log("BACKEND RESPONSE:", data);
-
-      if (!data.payment_session_id) {
-        alert("Payment session not created");
-        return;
-      }
-
-      // ✅ FINAL FIX HERE
-      cashfree.pay({
-        paymentSessionId: data.payment_session_id,
-        redirectTarget: "_self"
-      });
-
-    } catch (err) {
-      console.error(err);
-      alert("Payment failed to start");
-    }
-
-  });
-
+  } catch (e) {
+    console.error(e);
+    alert("Payment failed to start");
+  }
 });
 </script>
 
