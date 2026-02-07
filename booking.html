@@ -62,7 +62,9 @@ button{
     <option value="4">4 Seats</option>
   </select>
 
-  <div class="price">Total: ₹<span id="amount">100</span></div>
+  <div class="price">
+    Total: ₹<span id="amount">100</span>
+  </div>
 
   <button id="payBtn">Pay Now</button>
 </div>
@@ -82,8 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
     amountEl.innerText = seats.value * 100;
   });
 
-  payBtn.addEventListener("click", () => {
-    alert("PAY BUTTON CLICKED"); // 🔴 DEBUG (must show)
+  payBtn.addEventListener("click", async () => {
 
     const email = document.getElementById("email").value;
     const amount = seats.value * 100;
@@ -93,33 +94,39 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: amount,
-        email: email,
-        phone: "9999999999"
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const res = await fetch(
+        "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: amount,
+            email: email,
+            phone: "9999999999"
+          })
+        }
+      );
+
+      const data = await res.json();
       console.log("BACKEND RESPONSE:", data);
 
       if (!data.payment_session_id) {
-        alert("Session not created");
+        alert("Payment session not created");
         return;
       }
 
+      // ✅ FINAL FIX HERE
       cashfree.pay({
         paymentSessionId: data.payment_session_id,
-        redirectTarget: "_top"
+        redirectTarget: "_self"
       });
-    })
-    .catch(err => {
+
+    } catch (err) {
       console.error(err);
-      alert("Payment failed");
-    });
+      alert("Payment failed to start");
+    }
+
   });
 
 });
