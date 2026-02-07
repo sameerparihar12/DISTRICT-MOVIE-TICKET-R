@@ -127,35 +127,4 @@ document.getElementById("payBtn").addEventListener("click", async () => {
 </script>
 
 </body>
-</html>        body: JSON.stringify({
-          orderAmount: seats * 100,
-          customerEmail: email,
-          customerName: "Movie Ticket Customer",
-          customerPhone: "9999999999",
-          orderNote: `Movie - ${showtime} (${date})`
-        })
-      }
-    );
-
-    const data = await res.json();
-    console.log(data);
-
-    if (!data.payment_session_id) {
-      alert("Payment session not created");
-      return;
-    }
-
-    // ✅ OFFICIAL CASHFREE REDIRECT (NO SDK)
-window.location.href =
-  "https://payments.cashfree.com/checkout/#/payment?payment_session_id=" +
-  data.payment_session_id;
-
-  } catch (e) {
-    console.error(e);
-    alert("Payment failed to start");
-  }
-});
-</script>
-
-</body>
 </html>
