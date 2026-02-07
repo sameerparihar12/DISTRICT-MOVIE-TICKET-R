@@ -1,152 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>District Movie Ticket</title>
+  <title>Movie Ticket</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, sans-serif;
-      color: #fff;
+      background:#0f172a;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-family:Arial;
+      color:#fff;
     }
-
-    .card {
-      background: #1f1f1f;
-      padding: 25px;
-      width: 100%;
-      max-width: 420px;
-      border-radius: 12px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    .box {
+      background:#111827;
+      padding:25px;
+      width:100%;
+      max-width:400px;
+      border-radius:12px;
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #00ffc8;
+    input,select,button {
+      width:100%;
+      margin-top:10px;
+      padding:10px;
+      border-radius:6px;
+      border:none;
     }
-
-    label {
-      display: block;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border-radius: 6px;
-      border: none;
-      background: #2e2e2e;
-      color: #fff;
-    }
-
-    .price {
-      margin-top: 15px;
-      text-align: center;
-      color: #00ff99;
-      font-size: 16px;
-    }
-
     button {
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: #e50914;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
+      background:#22c55e;
+      color:#000;
+      font-weight:bold;
+      cursor:pointer;
     }
   </style>
 </head>
+
 <body>
 
-<div class="card">
-  <h1>🎟️ Movie Ticket</h1>
+<div class="box">
+  <h2>🎟 Movie Ticket</h2>
 
-  <label>Date</label>
-  <input type="date" id="date">
-
-  <label>Show Time</label>
-  <select id="showtime">
-    <option>9 AM</option>
-    <option>12 PM</option>
-    <option>3 PM</option>
-    <option>6 PM</option>
-    <option>9 PM</option>
-  </select>
-
-  <label>Seats</label>
+  <input type="email" id="email" placeholder="Email">
   <select id="seats">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
+    <option value="1">1 Seat</option>
+    <option value="2">2 Seats</option>
+    <option value="3">3 Seats</option>
+    <option value="4">4 Seats</option>
   </select>
 
-  <label>Email</label>
-  <input type="email" id="email" placeholder="you@example.com">
-
-  <div class="price">
-    Total: ₹<span id="amount">100</span>
-  </div>
+  <p>Total: ₹<span id="amt">100</span></p>
 
   <button id="payBtn">Pay Now</button>
 </div>
 
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
+  const cashfree = Cashfree({ mode: "production" });
+
   const seats = document.getElementById("seats");
-  const amountEl = document.getElementById("amount");
-  const payBtn = document.getElementById("payBtn");
+  const amt = document.getElementById("amt");
+  const btn = document.getElementById("payBtn");
 
-  seats.addEventListener("change", () => {
-    amountEl.innerText = seats.value * 100;
-  });
+  seats.onchange = () => amt.innerText = seats.value * 100;
 
-  payBtn.addEventListener("click", () => {
-
-    const date = document.getElementById("date").value;
+  btn.onclick = () => {
     const email = document.getElementById("email").value;
-    const seatCount = parseInt(seats.value);
-    const amount = seatCount * 100;
+    const amount = seats.value * 100;
 
-    if (!date || !email) {
-      alert("Please fill all details");
+    if (!email) {
+      alert("Enter email");
       return;
     }
 
-    fetch("https://district-movie-ticket-r-backend-1.onrender.com/create-payment-link", {
+    fetch("https://YOUR-RENDER-BACKEND.onrender.com/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount: amount,
-        email: email,
+        amount,
+        email,
         phone: "9999999999"
       })
     })
     .then(res => res.json())
     .then(data => {
-      if (!data.link_url) {
-        alert("Payment link failed");
+
+      if (!data.payment_session_id) {
+        alert("Session failed");
         return;
       }
-      window.location.href = data.link_url;
+
+      cashfree.pay({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_top"   // 🔥 Netlify + Android SAFE
+      });
+
     })
-    .catch(() => {
-      alert("Payment failed to start");
-    });
-  });
+    .catch(() => alert("Payment failed"));
+  };
 
 });
 </script>
