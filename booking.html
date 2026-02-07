@@ -126,9 +126,9 @@ document.getElementById("payBtn").addEventListener("click", async () => {
     }
 
     // ✅ OFFICIAL CASHFREE REDIRECT (NO SDK)
-    window.location.href =
-      "https://payments.cashfree.com/checkout/" +
-      data.payment_session_id;
+window.location.href =
+  "https://payments.cashfree.com/checkout/#/payment?payment_session_id=" +
+  data.payment_session_id;
 
   } catch (e) {
     console.error(e);
