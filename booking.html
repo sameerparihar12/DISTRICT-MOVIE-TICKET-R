@@ -1,69 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book Ticket</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Ticket Booking</title>
 
-  <style>
-    body {
-      background:#111;
-      color:#fff;
-      font-family: Arial, sans-serif;
-    }
-    .box {
-      max-width: 420px;
-      margin: 40px auto;
-      background:#1e1e1e;
-      padding:20px;
-      border-radius:8px;
-    }
-    label {
-      display:block;
-      margin-top:12px;
-    }
-    input, select, button {
-      width:100%;
-      margin-top:6px;
-      padding:10px;
-      border-radius:5px;
-      border:none;
-      font-size:15px;
-    }
-    input, select {
-      background:#333;
-      color:#fff;
-    }
-    button {
-      background:#e50914;
-      color:#fff;
-      margin-top:20px;
-      cursor:pointer;
-    }
-    .price {
-      margin-top:15px;
-      color:#00ff99;
-      font-weight:bold;
-    }
-  </style>
+<style>
+body {
+  background:#111;
+  color:#fff;
+  font-family:Arial, sans-serif;
+}
+.container {
+  max-width:400px;
+  margin:40px auto;
+  background:#1e1e1e;
+  padding:20px;
+  border-radius:8px;
+}
+label {
+  margin-top:10px;
+  display:block;
+}
+input, select, button {
+  width:100%;
+  margin-top:5px;
+  padding:10px;
+  border-radius:5px;
+  border:none;
+}
+input, select {
+  background:#333;
+  color:#fff;
+}
+button {
+  margin-top:20px;
+  background:#e50914;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+.price {
+  margin-top:10px;
+  color:#00ff99;
+}
+</style>
 </head>
 
 <body>
 
-<div class="box">
-  <h2>🎟️ Movie Ticket Booking</h2>
+<div class="container">
+  <h2>🎟 Movie Ticket</h2>
 
-  <label>Date</label>
-  <input type="date" id="date" required>
-
-  <label>Show Time</label>
-  <select id="showtime">
-    <option value="9 AM">9 AM</option>
-    <option value="12 PM">12 PM</option>
-    <option value="3 PM">3 PM</option>
-    <option value="6 PM">6 PM</option>
-    <option value="9 PM">9 PM</option>
-  </select>
+  <label>Email</label>
+  <input type="email" id="email" required>
 
   <label>Seats</label>
   <select id="seats">
@@ -73,13 +63,12 @@
     <option value="4">4</option>
   </select>
 
-  <label>Email</label>
-  <input type="email" id="email" placeholder="you@email.com" required>
-
   <div class="price">Total: ₹<span id="total">100</span></div>
 
   <button id="payBtn">Pay Now</button>
 </div>
+
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <script>
 const seatsEl = document.getElementById("seats");
@@ -91,13 +80,12 @@ seatsEl.addEventListener("change", () => {
 
 document.getElementById("payBtn").addEventListener("click", async () => {
 
-  const date = document.getElementById("date").value;
-  const showtime = document.getElementById("showtime").value;
-  const seats = parseInt(seatsEl.value);
   const email = document.getElementById("email").value;
+  const seats = parseInt(seatsEl.value);
+  const amount = seats * 100;
 
-  if (!date || !email || !seats) {
-    alert("Fill all details");
+  if (!email) {
+    alert("Enter email");
     return;
   }
 
@@ -108,6 +96,38 @@ document.getElementById("payBtn").addEventListener("click", async () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          orderAmount: amount,
+          customerEmail: email,
+          customerName: "Movie Ticket Customer",
+          customerPhone: "9999999999"
+        })
+      }
+    );
+
+    const data = await res.json();
+    console.log("ORDER DATA:", data);
+
+    if (!data.payment_session_id) {
+      alert("Payment session not created");
+      return;
+    }
+
+    const cashfree = Cashfree({ mode: "production" });
+
+    cashfree.pay({
+      paymentSessionId: data.payment_session_id,
+      redirectTarget: "_self"
+    });
+
+  } catch (e) {
+    console.error(e);
+    alert("Payment failed to start");
+  }
+});
+</script>
+
+</body>
+</html>        body: JSON.stringify({
           orderAmount: seats * 100,
           customerEmail: email,
           customerName: "Movie Ticket Customer",
