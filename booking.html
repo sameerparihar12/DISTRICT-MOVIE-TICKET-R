@@ -1,121 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Movie Ticket Booking</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Tickets - District Movie Ticket R</title>
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --card: #1a1a1a;
+      --text: #e0e0e0;
+      --accent: #e50914;
+      --success: #00ff99;
+      --error: #ff4d4d;
+      --radius: 12px;
+    }
 
-<style>
-body {
-  background:#111;
-  color:#fff;
-  font-family:Arial, sans-serif;
-}
-.box {
-  max-width:420px;
-  margin:40px auto;
-  background:#1e1e1e;
-  padding:20px;
-  border-radius:8px;
-}
-input, select, button {
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border-radius:5px;
-  border:none;
-}
-input, select {
-  background:#333;
-  color:#fff;
-}
-button {
-  background:#e50914;
-  color:#fff;
-  font-size:16px;
-  cursor:pointer;
-}
-.price {
-  margin-top:10px;
-  color:#00ff99;
-}
-</style>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    }
+
+    h2 { text-align: center; margin-bottom: 1.8rem; font-size: 1.9rem; }
+
+    label { display: block; margin: 1.2rem 0 0.5rem; font-weight: 500; }
+
+    input, select {
+      width: 100%;
+      padding: 0.9rem;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #222;
+      color: white;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(229,9,20,0.25);
+    }
+
+    .total {
+      margin: 1.5rem 0;
+      font-size: 1.4rem;
+      text-align: center;
+      color: var(--success);
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover { background: #c00a12; }
+    button:disabled { background: #555; cursor: not-allowed; }
+
+    #message {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+    }
+
+    .success { background: rgba(0,255,153,0.2); color: var(--success); }
+    .error   { background: rgba(255,77,77,0.2);   color: var(--error); }
+  </style>
 </head>
-
 <body>
 
-<div class="box">
-  <h2>🎟 Movie Ticket</h2>
+<div class="container">
+  <h2>🎟 Book Your Tickets</h2>
 
-  <input type="email" id="email" placeholder="Enter email">
+  <div id="movieInfo" style="text-align:center; margin-bottom:1.5rem; color:#ccc; font-size:1.15rem;"></div>
 
+  <label for="email">Email</label>
+  <input type="email" id="email" placeholder="your@email.com" required />
+
+  <label for="seats">Number of Seats</label>
   <select id="seats">
-    <option value="1">1 Seat</option>
-    <option value="2">2 Seats</option>
-    <option value="3">3 Seats</option>
-    <option value="4">4 Seats</option>
+    <option value="1">1 Seat — ₹100</option>
+    <option value="2">2 Seats — ₹200</option>
+    <option value="3">3 Seats — ₹300</option>
+    <option value="4">4 Seats — ₹400</option>
   </select>
 
-  <div class="price">Total: ₹<span id="amount">100</span></div>
+  <div class="total">Total: ₹<span id="amount">100</span></div>
 
   <button id="payBtn">Pay Now</button>
+
+  <div id="message"></div>
 </div>
 
 <script>
-const seats = document.getElementById("seats");
-const amountEl = document.getElementById("amount");
+  // Show movie name
+  const params = new URLSearchParams(window.location.search);
+  const movie = decodeURIComponent(params.get("movie") || "Selected Movie");
+  document.getElementById("movieInfo").innerHTML = `Movie: <strong>${movie}</strong>`;
 
-seats.addEventListener("change", () => {
-  amountEl.innerText = seats.value * 100;
-});
+  // Update total amount
+  const seatsEl = document.getElementById("seats");
+  const amountEl = document.getElementById("amount");
+  const payBtn   = document.getElementById("payBtn");
+  const msgEl    = document.getElementById("message");
 
-document.getElementById("payBtn").addEventListener("click", async () => {
-
-  const email = document.getElementById("email").value;
-  const seatCount = parseInt(seats.value);
-  const amount = seatCount * 100;
-
-  if (!email) {
-    alert("Enter email");
-    return;
+  function updateAmount() {
+    amountEl.textContent = seatsEl.value * 100;
   }
+  seatsEl.addEventListener("change", updateAmount);
+  updateAmount();
 
-  try {
-    const res = await fetch(
-      "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderAmount: amount,
-          customerEmail: email,
-          customerName: "Movie Ticket Customer",
-          customerPhone: "9999999999",
-          orderNote: "Movie Ticket Booking"
-        })
-      }
-    );
-
-    const data = await res.json();
-    console.log("BACKEND RESPONSE:", data);
-
-    if (!data.payment_session_id || !data.order_id) {
-      alert("Payment session not created");
+  // Payment
+  payBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    if (!email || !email.includes("@")) {
+      showMessage("Please enter a valid email", "error");
       return;
     }
 
-    // 🔥 PURANA WORKING REDIRECT (PAGE LOADS)
-    window.location.href =
-      "https://payments.cashfree.com/pg/orders/" +
-      data.order_id +
-      "?payment_session_id=" +
-      data.payment_session_id;
+    payBtn.disabled = true;
+    payBtn.textContent = "Processing...";
+    showMessage("", "");
 
-  } catch (e) {
-    console.error(e);
-    alert("Payment failed to start");
+    try {
+      const res = await fetch(
+        "https://district-movie-ticket-r-backend-1.onrender.com/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderAmount: Number(amountEl.textContent),
+            customerEmail: email,
+            orderNote: `Tickets for ${movie}`
+          })
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.payment_session_id) {
+        throw new Error(data.error || "Failed to create order");
+      }
+
+      const cashfree = Cashfree({
+        mode: "production"  // ← Production mode
+      });
+
+      cashfree.checkout({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_self"  // or "_blank" if you want new tab
+      });
+
+    } catch (err) {
+      console.error(err);
+      showMessage("Payment setup failed: " + (err.message || "Try again"), "error");
+    } finally {
+      payBtn.disabled = false;
+      payBtn.textContent = "Pay Now";
+    }
+  });
+
+  function showMessage(text, type = "") {
+    msgEl.textContent = text;
+    msgEl.className = type;
+    msgEl.style.display = text ? "block" : "none";
   }
-});
 </script>
 
 </body>
