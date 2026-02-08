@@ -11,20 +11,16 @@ body {
   color:#fff;
   font-family:Arial, sans-serif;
 }
-.container {
-  max-width:400px;
+.box {
+  max-width:420px;
   margin:40px auto;
   background:#1e1e1e;
   padding:20px;
   border-radius:8px;
 }
-label {
-  margin-top:10px;
-  display:block;
-}
 input, select, button {
   width:100%;
-  margin-top:5px;
+  margin-top:10px;
   padding:10px;
   border-radius:5px;
   border:none;
@@ -34,7 +30,6 @@ input, select {
   color:#fff;
 }
 button {
-  margin-top:20px;
   background:#e50914;
   color:#fff;
   font-size:16px;
@@ -49,40 +44,36 @@ button {
 
 <body>
 
-<div class="container">
+<div class="box">
   <h2>🎟 Movie Ticket</h2>
 
-  <label>Email</label>
-  <input type="email" id="email" required>
+  <input type="email" id="email" placeholder="Enter email">
 
-  <label>Seats</label>
   <select id="seats">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
+    <option value="1">1 Seat</option>
+    <option value="2">2 Seats</option>
+    <option value="3">3 Seats</option>
+    <option value="4">4 Seats</option>
   </select>
 
-  <div class="price">Total: ₹<span id="total">100</span></div>
+  <div class="price">Total: ₹<span id="amount">100</span></div>
 
   <button id="payBtn">Pay Now</button>
 </div>
 
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-
 <script>
-const seatsEl = document.getElementById("seats");
-const totalEl = document.getElementById("total");
+const seats = document.getElementById("seats");
+const amountEl = document.getElementById("amount");
 
-seatsEl.addEventListener("change", () => {
-  totalEl.innerText = seatsEl.value * 100;
+seats.addEventListener("change", () => {
+  amountEl.innerText = seats.value * 100;
 });
 
 document.getElementById("payBtn").addEventListener("click", async () => {
 
   const email = document.getElementById("email").value;
-  const seats = parseInt(seatsEl.value);
-  const amount = seats * 100;
+  const seatCount = parseInt(seats.value);
+  const amount = seatCount * 100;
 
   if (!email) {
     alert("Enter email");
@@ -99,25 +90,26 @@ document.getElementById("payBtn").addEventListener("click", async () => {
           orderAmount: amount,
           customerEmail: email,
           customerName: "Movie Ticket Customer",
-          customerPhone: "9999999999"
+          customerPhone: "9999999999",
+          orderNote: "Movie Ticket Booking"
         })
       }
     );
 
     const data = await res.json();
-    console.log("ORDER DATA:", data);
+    console.log("BACKEND RESPONSE:", data);
 
-    if (!data.payment_session_id) {
+    if (!data.payment_session_id || !data.order_id) {
       alert("Payment session not created");
       return;
     }
 
-    const cashfree = Cashfree({ mode: "production" });
-
-    cashfree.pay({
-      paymentSessionId: data.payment_session_id,
-      redirectTarget: "_self"
-    });
+    // 🔥 PURANA WORKING REDIRECT (PAGE LOADS)
+    window.location.href =
+      "https://payments.cashfree.com/pg/orders/" +
+      data.order_id +
+      "?payment_session_id=" +
+      data.payment_session_id;
 
   } catch (e) {
     console.error(e);
