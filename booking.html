@@ -173,12 +173,12 @@
   <label for="seats">Number of Seats</label>
   <select id="seats">
     <option value="1">1 Seat — ₹1399</option>
-    <option value="12">12 Seats — ₹1399</option>
-    <option value="9">9 Seats — ₹1399</option>
-    <option value="10">10 Seats — ₹1490</option>
+    <option value="12">12 Seats — ₹1299</option>
+    <option value="9">9 Seats — ₹999</option>
+    <option value="10">10 Seats — ₹1000</option>
   </select>
 
-  <div class="total">Total: ₹<span id="amount">999</span></div>
+  <div class="total">Total: ₹<span id="amount">1299</span></div>
 
   <button id="payBtn">
     <span id="btnText">Pay Now</span>
@@ -203,7 +203,7 @@ const spinner  = document.getElementById("loadingSpinner");
 const msgEl    = document.getElementById("message");
 
 function updateAmount() {
-  amountEl.textContent = seatsEl.value * 100;
+  amountEl.textContent = seatsEl.value * 1399;
 }
 seatsEl.addEventListener("change", updateAmount);
 updateAmount();
